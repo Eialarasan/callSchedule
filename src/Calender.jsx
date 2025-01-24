@@ -35,8 +35,6 @@ const groupOverlappingEvents = (events) => {
         visited.add(j);
       }
     }
-console.log(group,"group");
-
     // Create a single event with overlap count
     groupedEvents.push({
       title: group[0]?.additionalDetails?.job_id?.jobRequest_Title,
@@ -131,7 +129,7 @@ const Calender = () => {
   const [groupedCalls, setGroupedCalls] = useState([]);
 const[openOverLapModal,setOpenOverLapModal]=useState(false)
 const [selectEvent, setselectEvent] = useState(false);
-
+const [currentView, setCurrentView] = useState(Views.MONTH); 
 const handleOverlapSelect=(event)=>{
 setOpenOverLapModal(false)
 setShowModal(true)
@@ -160,63 +158,86 @@ setselectEvent(true)
     setOpenOverLapModal(false);
     setGroupedCalls([]);
   };
-
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+    // Handle any specific logic for the selected view (month, week, day)
+  };
   return (
     <Container style={{ height: "100vh", paddingTop: "20px" }}>
       <Typography variant="h4" align="center" gutterBottom>
         React Calendar App
       </Typography>
       <Calendar
-  localizer={localizer}
-  events={events}
-  views={Object.values(Views)} // Ensure views are passed correctly
-  defaultView={Views.MONTH} // Default to week view
-  onSelectEvent={handleShowMore}
-  components={{
-    event: ({ event }) => {
-     return <>
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          borderRadius: "10px", // Rounded corners
-          padding: "4px", // Padding for inner content
-          boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)", // Optional shadow for a better look
+        localizer={localizer}
+        events={events}
+        views={Object.values(Views)} // Allow all views
+        view={currentView} // Controlled by state
+        onView={handleViewChange} // Update state on view change
+        defaultView={Views.MONTH} // Default to month view
+        onSelectEvent={handleShowMore}
+        components={{
+          event: ({ event }) => (
+            <>
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                borderRadius: "10px",
+                padding: "4px",
+                boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <span>{event.title}</span>
+              {currentView === "month" && event.overlapCount > 1 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 5,
+                    right: 1,
+                    width: 20,
+                    height: 20,
+                    backgroundColor: "gold",
+                    color: "white",
+                    borderRadius: "50%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {event.overlapCount}
+                </div>
+              )}
+            </div>
+            {currentView !== "month" && event.overlapCount > 1 && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 5,
+                  right: 1,
+                  width: 20,
+                  height: 20,
+                  backgroundColor: "gold",
+                  color: "white",
+                  borderRadius: "50%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                }}
+              >
+                {event.overlapCount}
+              </div>
+            )}
+            </>
+          ),
         }}
-      >
-        <span>{event.title}</span>
-       
-      </div>
-      {event.overlapCount > 1 && (
-          <div
-            style={{
-              position: "absolute",
-              top: 5,
-              right: 1,
-              width: 20,
-              height: 20,
-              backgroundColor: "gold",
-              color: "white",
-              borderRadius: "50%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              fontSize: "12px",
-              fontWeight: "bold",
-            }}
-          >
-            {event.overlapCount}
-          </div>
-        )}
-      </>
-    },
-    timeGutterHeader: () => null, // Removes the time column header
-    timeSlotWrapper: ({ children }) => <>{children}</>, // Prevents rendering of default times
-  }}
-/>
+      />
 
 
       {/* Modal for showing detailed event info */}
